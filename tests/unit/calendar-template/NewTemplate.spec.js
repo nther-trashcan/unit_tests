@@ -134,7 +134,7 @@ describe('Component', () => {
     })
 
     it('is mocking function properly',()=>{
-        // wrapper.vm.validateTemplateDate()  
+
         wrapper.vm.effectiveError("Invalid date")
         expect(wrapper.vm.errorMsgEffectiveFrom).toEqual("Invalid Date")
         wrapper.setData({
@@ -179,13 +179,27 @@ describe('Component', () => {
             first_day_of_week: 1,
             enabled: true,
             show_week_numbers: false,
-            activities: [],
+            activities: [{
+                activity_from:"2022/06/30",
+                activity_to:"2099/11/30",
+                from:"12:00 PM",
+                to:"06:00 PM",
+                activity_type_name:"activityType1"
+            }],
             removed: [],
             dates: [],
-        }
+            activity_from:"2022/05/31 12:00 PM",
+            activity:{
+                activity_from:"2022/06/30",
+                activity_to:"2099/11/30",
+                from:"12:00 PM",
+                to:"06:00 PM",
+                activity_type_name:"activityType1"
+            },
+            
 
+        }
         const isValid=true;
-        
         wrapper.vm.deleteAddedHours(0,template)
         console.log(wrapper.vm.templateForm)
         wrapper.setData({
@@ -197,26 +211,61 @@ describe('Component', () => {
         expect(wrapper.vm.index).toEqual(0)
         expect(wrapper.vm.item.name).toEqual("item1")
         expect(wrapper.vm.item.location_ids).toEqual(["0","1"])
-
-        wrapper.vm.setActivityForm(form,isValid)
-        // wrapper.vm.occurenceEndDate({},{})
-        // // wrapper.vm.dateRange({})
-        // wrapper.vm.getDateByWeekAndMonth()
-        // wrapper.vm.activityCheck()
-        // wrapper.vm.breakCheck()
-        // wrapper.vm.appointmentBlockCheck()
-        // wrapper.vm.workingHourCheck()
-        // wrapper.vm.outOfOfficeCheck()
-        // wrapper.vm.fetchCategories()
-        // wrapper.vm.availableLocation()
-        // wrapper.vm.fetchTemplateData()
-        // wrapper.vm.emitForm()
-        // wrapper.vm.effectiveDefault()
-        // wrapper.vm.setEffectiveFrom()
-        // wrapper.vm.setEffectiveTo()
-        // console.log(wrapper.vm.dateRules({}))
-        
-
+        const activity={
+            number_of_occurences:0,
+            activity_name: "",
+            activity_type_id: "",
+            appointment_type_ids: [],
+            activity_from: "2022/06/30",
+            activity_to: "2099/11/30",
+            location_ids: null,
+            allDay: false,
+            from: "",
+            to: "",
+            frequency: "DAILY",
+            select_week_number: "",
+            appointment_block_override: false,
+            repeat_every: 1,
+            red: 64,
+            repeat_in_week: "01",
+            days: ["MO", "TU", "WE", "TH", "FR", "SA", "SU"],
+            yearly_month_first_dropdown: 1,
+            yearly_month_second_dropdown: 1,
+            r_dates: ["2022/05/31","2022/06/30"],
+            weeks: 1,
+            first_day_textfield: 1,
+            second_day_textfield: "MO",
+            radio_btn: "one",
+            ends: "on",
+            afterCount: "1",
+        }
+        const response={
+            check:null,
+            value:""
+        }
+        wrapper.vm.occurenceEndDate(activity,form)
+        wrapper.setData({
+            templateForm:form
+        })
+        expect(wrapper.vm.getDateByWeekAndMonth("2022/05/31","Tuesday",2).format("YYYY/MM/DD")).toEqual("2022/05/08")
+        wrapper.vm.breakCheck(activity,response)
+        wrapper.vm.appointmentBlockCheck(activity,response)
+        expect(response.check).toEqual(false)
+        wrapper.vm.workingHourCheck(activity,response)
+        expect(response.check).toEqual(false)
+        wrapper.vm.outOfOfficeCheck(activity,response)
+        wrapper.vm.fetchCategories()
+        wrapper.vm.availableLocation()
+        wrapper.vm.fetchTemplateData()
+        wrapper.setData({templateForm:form})
+        wrapper.vm.emitForm()
+        expect(wrapper.emitted()["form"][2][0].name).toEqual("form1")
+        expect(wrapper.emitted()["form"][2][0].description).toEqual("This is a form description.")
+        wrapper.vm.effectiveDefault("2099/12/31")
+        expect(wrapper.vm.templateForm.effective_to).toEqual("2099/12/31")
+        wrapper.vm.setEffectiveFrom("2022/05/31")
+        expect(wrapper.vm.templateForm.effective_from).toEqual("2022/05/31")        
+        expect(typeof wrapper.vm.dateRules("2022/04/30")[0]).toEqual("function")
         wrapper.vm.setDefaultTimeZone()
         wrapper.setData({
             templateForm:{
@@ -225,17 +274,10 @@ describe('Component', () => {
         })
         wrapper.vm.setFirstDayOfTheWeek(2)
         expect(wrapper.vm.templateForm.first_day_of_week).toEqual(2)
-        wrapper.vm.resetActivity({activity:{
-            location_ids:["0","1"],
-            r_dates:["2022/05/31","2022/06/30"],
-            from:"",
-            to:"",
-            customId:"",
-            recurrence_pattern:{}
-        }})
+        wrapper.vm.resetActivity(activity)
         const locs=[{id:"0",name:"location1"},{id:"1",name:"location2"}]
         wrapper.vm.setLocations(locs)
-        expect(wrapper.emitted()["locations"][0][0].id).toEqual("0")
-        expect(wrapper.emitted()["locations"][0][0].name).toEqual("location1")
+        expect(wrapper.emitted()["locations"][0][0][0].id).toEqual("0")
+        expect(wrapper.emitted()["locations"][0][0][0].name).toEqual("location1")
     })
 });
